@@ -1,10 +1,8 @@
-from datetime import date
-
 from rest_framework import serializers
 from rest_framework.exceptions import PermissionDenied, ValidationError
 
 from core.serializers import ProfileSerializer
-from todolist.goals.models import GoalCategory, Goal
+from todolist.goals.models import GoalCategory, Goal, GoalComment
 
 
 class GoalCategoryCreateSerializer(serializers.ModelSerializer):
@@ -55,3 +53,9 @@ class GoalSerializer(serializers.ModelSerializer):
         if self.context['request'].user.id != value.user_id:
             raise PermissionDenied
         return value
+
+
+class GoalCommentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = GoalComment
+        fields = ('id', 'goal_id', 'author_id', 'text', 'created_at', 'updated_at')

@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 
 from core.models import User
 
@@ -51,3 +52,11 @@ class Goal(BaseModel):
 
     def __str__(self):
         return self.title
+
+
+class GoalComment(models.Model):
+    goal = models.ForeignKey(Goal, on_delete=models.CASCADE)
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(default=timezone.now)
+    updated_at = models.DateTimeField(auto_now=True)
