@@ -4,6 +4,7 @@ from django.urls import path, include
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('goals/', include(('todolist.goals.urls', 'todolist.goals'))),
     path('core/', include(('core.urls', 'core'))),
     path('oauth/', include('social_django.urls', namespace='social')),
 ]
