@@ -1,13 +1,14 @@
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, filters
 from rest_framework.exceptions import PermissionDenied
 from rest_framework.filters import OrderingFilter, SearchFilter
+from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 
 from todolist.goals.filters import GoalDateFilter
 from todolist.goals.models import GoalCategory, Goal, GoalComment
 from todolist.goals.serializers import GoalCategoryCreateSerializer, GoalCategorySerializer, GoalCreateSerializer, \
-    GoalSerializer, GoalCommentSerializer
+    GoalSerializer, GoalCommentSerializer, GoalCommentCreateSerializer
 
 
 class GoalCategoryCreateView(generics.CreateAPIView):
@@ -79,38 +80,25 @@ class GoalView(generics.RetrieveUpdateDestroyAPIView):
 
 class GoalCommentCreateView(generics.CreateAPIView):
     permission_classes = [permissions.IsAuthenticated]
-    serializer_class = GoalCommentSerializer
-
-    def perform_create(self, serializer):
-        if serializer.validated_data['goal_id'].owner_id != self.request.user.id:
-            raise PermissionDenied("You cannot create a comment for someone else's goal")
-        serializer.save(author_id=self.request.user.id)
-
-
-class GoalCommentRetrieveUpdateDestroyView(generics.RetrieveUpdateDestroyAPIView):
-    permission_classes = [permissions.IsAuthenticated]
-    serializer_class = GoalCommentSerializer
-    queryset = GoalComment.objects.all()
-
-    def get_object(self):
-        obj = super().get_object()
-        if obj.author_id != self.request.user.id:
-            raise PermissionDenied("You cannot access someone else's comment")
-        return obj
+    serializer_class = GoalCommentCreateSerializer
 
 
 class GoalCommentListView(generics.ListAPIView):
+    model = GoalComment
+    permission_classes = [permissions.IsAuthenticated]
+    serializer_class = GoalCommentSerializer
+    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    filterset_fields = ['goal']
+    ordering = ['created']
+
+    def get_queryset(self):
+        return GoalComment.objects.filter(user_id=self.request.user.id)
+
+
+class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
+    model = GoalComment
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = GoalCommentSerializer
 
     def get_queryset(self):
-        queryset = GoalComment.objects.filter(goal_id=self.request.query_params.get('goal_id'))
-
-        queryset = queryset.order_by('-created_at')
-
-        limit = self.request.query_params.get('limit')
-        offset = self.request.query_params.get('offset')
-        if limit is not None and offset is not None:
-            queryset = queryset[int(offset):int(offset) + int(limit)]
-
-        return queryset
+        return GoalComment.objects.filter(user_id=self.request.user.id)
