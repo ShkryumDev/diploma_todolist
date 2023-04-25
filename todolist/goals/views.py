@@ -1,9 +1,8 @@
 from django.db import transaction
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import generics, permissions, filters
-from rest_framework.exceptions import PermissionDenied
+from rest_framework import generics, permissions
+
 from rest_framework.filters import OrderingFilter, SearchFilter
-from rest_framework.generics import CreateAPIView, ListAPIView, RetrieveUpdateDestroyAPIView
 
 from todolist.goals.filters import GoalDateFilter
 from todolist.goals.models import GoalCategory, Goal, GoalComment
@@ -87,7 +86,7 @@ class GoalCommentListView(generics.ListAPIView):
     model = GoalComment
     permission_classes = [permissions.IsAuthenticated]
     serializer_class = GoalCommentSerializer
-    filter_backends = [filters.OrderingFilter, filters.SearchFilter]
+    filter_backends = [DjangoFilterBackend, OrderingFilter]
     filterset_fields = ['goal']
     ordering = ['created']
 

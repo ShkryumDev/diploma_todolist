@@ -35,13 +35,13 @@ class Goal(BaseModel):
     class Priority(models.IntegerChoices):
         low = 1, 'Низкий'
         medium = 2, 'Средний'
-        hight = 3, 'Высокий'
+        high = 3, 'Высокий'
         critical = 4, 'Критичный'
 
     title = models.CharField(max_length=255)
     description = models.TextField(null=True, blank=True)
     category = models.ForeignKey(GoalCategory, on_delete=models.PROTECT, related_name='goals')
-    due_data = models.DateField(null=True, blank=True)
+    due_date = models.DateField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.PROTECT, related_name='goals')
     status = models.PositiveSmallIntegerField(choices=Status.choices, default=Status.to_do)
     priority = models.PositiveSmallIntegerField(choices=Priority.choices, default=Priority.medium)
