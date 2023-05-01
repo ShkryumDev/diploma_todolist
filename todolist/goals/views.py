@@ -26,7 +26,8 @@ class BoardListView(generics.ListAPIView):
     ordering = ['title']
 
     def get_queryset(self):
-        return Board.objects.filter(participants__user_id=self.request.user_id, is_deleted=False)
+        return Board.objects.prefetch_related('participants__user').filter(participants__user_id=self.request.user_id,
+                                                                           is_deleted=False)
 
 
 class BoardView(generics.RetrieveUpdateDestroyAPIView):
@@ -57,7 +58,7 @@ class GoalCategoryListView(generics.ListAPIView):
     search_fields = ['title']
 
     def get_queryset(self):
-        return GoalCategory.objects.select_related('user').filter(user=self.request.user, is_deleted=False)
+        return GoalCategory.objects.prefetch_related('goals').filter(user=self.request.user, is_deleted=False)
 
 
 class GoalCategoryView(generics.RetrieveUpdateDestroyAPIView):
@@ -90,7 +91,8 @@ class GoalListView(generics.ListAPIView):
 
     def get_queryset(self):
         return (
-            Goal.objects.select_related('user').filter(user=self.request.user, category__is_deleted=False).exclude(
+            Goal.objects.prefetch_related('comments').select_related('category').filter(user=self.request.user,
+                                                                                        category__is_deleted=False).exclude(
                 status=Goal.Status.archived)
         )
 
@@ -124,7 +126,7 @@ class GoalCommentListView(generics.ListAPIView):
     ordering = ['created']
 
     def get_queryset(self):
-        return GoalComment.objects.filter(user_id=self.request.user.id)
+        return GoalComment.objects.filter(user_id=self.request.user.id).select_related('user', 'goal')
 
 
 class GoalCommentView(generics.RetrieveUpdateDestroyAPIView):
