@@ -34,13 +34,13 @@ class Command(BaseCommand):
                 user=tg_user.user, category__is_deleted=False
             ).exclude(status=Goal.Status.archived)
 
-            goals = [f'{goal.id} {goal.title}' for goal in qs]
+            goals = Goal.objects.filter(category__board__participants__user=tg_user.user).exclude(
+                status=Goal.Status.archived)
 
             self.tg_client.send_message(
                 chat_id=msg.chat.id,
                 text='No goals' if not goals else '\n'.join(goals)
             )
-
 
     def handle_unauthorized_user(self, tg_user: TgUser, msg: Message):
         code = tg_user.generate_verification_code()

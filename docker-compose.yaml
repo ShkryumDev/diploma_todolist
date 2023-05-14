@@ -11,7 +11,7 @@ services:
     volumes:
       - pg_diploma_data:/var/lib/postgresql/data/
     ports:
-      - '5432:5432'
+      - "5432:5432"
     healthcheck:
       test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
       timeout: 3s
@@ -33,7 +33,7 @@ services:
       - ./todolist:/opt/todolist
       - ./bot:/opt/bot
       - django_static:/opt/static
-    command: python manage.py runserver 0.0.0.0:8000
+    command: python ./todolist/manage.py runserver 127.0.0.1:8000
 
   bot:
     build: .
@@ -43,7 +43,7 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: python manage.py runbot
+    command: python ./todolist/manage.py runbot
 
   frontend:
     image: sermalenk/skypro-front:lesson-38
